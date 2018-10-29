@@ -23,7 +23,23 @@ else:
 
 
 class TrendingManager(Persistent):
-    """ADD DOC"""
+    """ Manages the trending subsystem.
+
+    TrendingManager is responsible for keeping all trending objects in one place.
+    In constructor, the manager takes database and all parameters.
+    Before processing, function 'createTrendingObjects' must be called.
+    When the ROOT hist is processed, the manger is notified about new histogram.
+    It invokes all trending objects that wanted this specific histogram.
+
+    Args:
+        dbRoot (PersistentMapping): Database
+        parameters (dict): Parameters read from configuration files
+
+    Attributes:
+        parameters (dict): Parameters read from configuration files
+        histToTrending (dict): Dictionary whose key is histogram and value is the list of trending objects
+        trendingDB (BTree): Database for trending
+        """
 
     def __init__(self, dbRoot, parameters):  # type: (PersistentMapping, dict)->None
         self.parameters = parameters
@@ -56,11 +72,27 @@ class TrendingManager(Persistent):
             dbPosition[objName] = BTree()
 
     def createTrendingObjects(self):
-        """ADD DOC"""
+        """ It loops over subsystems and calls function that creates trending objects for each subsystem.
+
+        Args:
+            None.
+        Return:
+            None.
+        """
         for subsystem in self.parameters[CON.SUBSYSTEMS]:
             self._createTrendingObjectsForSubsystem(subsystem)
 
     def _createTrendingObjectsForSubsystem(self, subsystemName):  # type: (str) -> None
+        """  Receives information about trending object and calls function that creates it.
+
+        It imports 'pluginManager' module and for each subsystem tries to get information about trending
+        object by invoking 'getTrendingObjectInfo' function from SYS.py.
+
+        Args:
+            subsystemName (str): Name of subsystem
+        Returns:
+            None.
+        """
         functionName = "{subsystem}_getTrendingObjectInfo".format(subsystem=subsystemName)
         getTrendingObjectInfo = getattr(pluginManager, functionName, None)  # type: Callable[[], List[TrendingInfo]]
         if getTrendingObjectInfo:
@@ -70,6 +102,17 @@ class TrendingManager(Persistent):
             logger.info("Could not find {functionName}".format(functionName=functionName))
 
     def _createTrendingObjectFromInfo(self, subsystemName, infoList):
+        """ Creates TrendingObject based on information that it has received.
+
+        In a loop it creates an instance of TrendingObject and saves to the database.
+        Then calls function in which the TrendingObject subscribes to histograms.
+
+        Args:
+            subsystemName (str): Name of subsystem
+            infoList (list): Information about trending object
+        Returns:
+            None.
+        """
         # type: (str, List[TrendingInfo]) -> None
         success = "Trending object {name} from subsystem {subsystemName} added to the trending manager"
         fail = "Trending object {name} already exists in subsystem {subsystemName}"
@@ -85,6 +128,14 @@ class TrendingManager(Persistent):
                 logger.debug(fail.format(name=self.trendingDB[subsystemName][info.name], subsystemName=subsystemName))
 
     def _subscribe(self, trendingObject, histogramNames):  # type: (TrendingObject, List[str])->None
+        """ Loops over histograms and assigns trendingObject to specific histogram.
+
+        Args:
+            trendingObject (TrendingObject): Instance of TrendingObject
+            histogramNames (list): List of histograms
+        Returns:
+            None.
+        """
         for histName in histogramNames:
             self.histToTrending[histName].append(trendingObject)
 
@@ -92,7 +143,15 @@ class TrendingManager(Persistent):
         self.trendingDB.clear()
 
     def processTrending(self):
-        """ADD DOC"""
+        """ Process the trending objects.
+
+        It loops over the trending objects and passes them to ``processHist()`` for plotting.
+
+        Args:
+            None.
+        Returns:
+            None.
+        """
         # Cannot have same name as other canvases, otherwise the canvas will be replaced, leading to segfaults
         canvasName = 'processTrendingCanvas'
         canvas = ROOT.TCanvas(canvasName, canvasName)
@@ -104,6 +163,15 @@ class TrendingManager(Persistent):
                 trendingObject.processHist(canvas)
 
     def notifyAboutNewHistogramValue(self, hist):  # type: (histogramContainer) -> None
-        """ADD DOC"""
+        """ This function is called when the ROOT histogram is being processed.
+
+        It loops over trending objects to which histogram is subscribed to and calls function that extracts
+        trended value from histogram e.g. mean, standard deviation (depending on trending object).
+
+        Args:
+            hist (histogramContainer): Histogram which is processed.
+        Returns:
+            None.
+        """
         for trend in self.histToTrending.get(hist.histName, []):
             trend.extractTrendValue(hist)
