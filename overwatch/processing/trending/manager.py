@@ -28,6 +28,9 @@ class TrendingManager(Persistent):
     TrendingManager is responsible for keeping all trending objects in one place.
     In constructor, the manager takes database and all parameters.
     Before processing, function 'createTrendingObjects' must be called.
+    It creates trending objects from received information,
+    which are received by invoking 'getTrendingObjectInfo' function from SYS.py.
+    Created trending objects are saved to database and assigned to the right histograms.
     When the ROOT hist is processed, the manger is notified about new histogram.
     It invokes all trending objects that wanted this specific histogram.
 
@@ -83,16 +86,6 @@ class TrendingManager(Persistent):
             self._createTrendingObjectsForSubsystem(subsystem)
 
     def _createTrendingObjectsForSubsystem(self, subsystemName):  # type: (str) -> None
-        """  Receives information about trending object and calls function that creates it.
-
-        It imports 'pluginManager' module and for each subsystem tries to get information about trending
-        object by invoking 'getTrendingObjectInfo' function from SYS.py.
-
-        Args:
-            subsystemName (str): Name of subsystem
-        Returns:
-            None.
-        """
         functionName = "{subsystem}_getTrendingObjectInfo".format(subsystem=subsystemName)
         getTrendingObjectInfo = getattr(pluginManager, functionName, None)  # type: Callable[[], List[TrendingInfo]]
         if getTrendingObjectInfo:
@@ -102,17 +95,6 @@ class TrendingManager(Persistent):
             logger.info("Could not find {functionName}".format(functionName=functionName))
 
     def _createTrendingObjectFromInfo(self, subsystemName, infoList):
-        """ Creates TrendingObject based on information that it has received.
-
-        In a loop it creates an instance of TrendingObject and saves to the database.
-        Then calls function in which the TrendingObject subscribes to histograms.
-
-        Args:
-            subsystemName (str): Name of subsystem
-            infoList (list): Information about trending object
-        Returns:
-            None.
-        """
         # type: (str, List[TrendingInfo]) -> None
         success = "Trending object {name} from subsystem {subsystemName} added to the trending manager"
         fail = "Trending object {name} already exists in subsystem {subsystemName}"
@@ -128,14 +110,6 @@ class TrendingManager(Persistent):
                 logger.debug(fail.format(name=self.trendingDB[subsystemName][info.name], subsystemName=subsystemName))
 
     def _subscribe(self, trendingObject, histogramNames):  # type: (TrendingObject, List[str])->None
-        """ Loops over histograms and assigns trendingObject to specific histogram.
-
-        Args:
-            trendingObject (TrendingObject): Instance of TrendingObject
-            histogramNames (list): List of histograms
-        Returns:
-            None.
-        """
         for histName in histogramNames:
             self.histToTrending[histName].append(trendingObject)
 
