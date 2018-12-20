@@ -14,6 +14,7 @@ except ImportError:
     pass
 
 basestring = past.builtins.basestring
+import overwatch.processing.trending.constants as CON
 
 
 class TrendingInfoException(Exception):
@@ -63,9 +64,19 @@ class TrendingInfo:
         Returns:
             TrendingObject: newly created object
         """
+
         trend = self.trendingClass(self.name, self.desc, self.histogramNames, subsystemName, parameters)
+
+
+        import ROOT
+        v = ROOT.vector(str)()
+        for s in self.histogramNames:
+            v.push_back(s)
+
+        trend = self.trendingClass(self.name, self.desc, v, subsystemName,parameters.get(CON.ENTRIES, 100), parameters[CON.DIR_PREFIX])
         trend.setAlarms(self._alarms)
         return trend
+
 
     @staticmethod
     def _validate(obj):  # type: (str) -> str
@@ -87,6 +98,6 @@ class TrendingInfo:
 
     @staticmethod
     def _validateTrendingClass(cls):  # type: (Any) -> Type[TrendingObject]
-        if not issubclass(cls, TrendingObject):
-            raise TrendingInfoException(msg='WrongTrendingClass', expected=TrendingObject, got=cls)
+        # if not issubclass(cls, TrendingObject):
+        #     raise TrendingInfoException(msg='WrongTrendingClass', expected=TrendingObject, got=cls)
         return cls

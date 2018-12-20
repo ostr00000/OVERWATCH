@@ -21,7 +21,7 @@ class MaximumTrending(TrendingObject):
         else:
             self.currentEntry += 1
 
-        newValue = hist.hist.GetMaximum()
+        newValue = hist.GetMaximum()
         self.trendedValues = np.append(self.trendedValues, newValue)
 
     def retrieveHist(self):

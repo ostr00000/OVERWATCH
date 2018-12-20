@@ -27,16 +27,15 @@ logger = logging.getLogger(__name__)
 
 class TrendingObject(Persistent):
 
-    def __init__(self, name, description, histogramNames, subsystemName, parameters):
+    def __init__(self, name, description, histogramNames, subsystemName, maxEntries, dirPrefix):
         # type: (str, str, list, str, dict) -> None
         self.name = name
         self.desc = description
         self.histogramNames = histogramNames
         self.subsystemName = subsystemName
-        self.parameters = parameters
 
         self.currentEntry = 0
-        self.maxEntries = self.parameters.get(CON.ENTRIES, 100)
+        self.maxEntries = maxEntries
         self.trendedValues = self.initializeTrendingArray()
         self.alarms = []
         self.alarmsMessages = []
@@ -44,7 +43,7 @@ class TrendingObject(Persistent):
         self.histogram = None
         # Ensure that the axis and points are drawn on the TGraph
         self.drawOptions = 'AP'
-
+        self.dirPrefix = dirPrefix
     def __str__(self):
         return self.name
 
@@ -93,9 +92,9 @@ class TrendingObject(Persistent):
 
         # Replace any slashes with underscores to ensure that it can be used safely as a filename
         outputNameWithoutExt = self.name.replace("/", "_") + '.{extension}'
-        outputPath = os.path.join(self.parameters[CON.DIR_PREFIX], CON.TRENDING,
+        outputPath = os.path.join(self.dirPrefix, CON.TRENDING,
                                   self.subsystemName, '{type}', outputNameWithoutExt)
-        imgFile = outputPath.format(type=CON.IMAGE, extension=self.parameters[CON.EXTENSION])
+        imgFile = outputPath.format(type=CON.IMAGE, extension='png')
         jsonFile = outputPath.format(type=CON.JSON, extension='json')
 
         logger.debug("Saving hist to {path}".format(path=imgFile))

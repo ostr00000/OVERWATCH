@@ -22,7 +22,7 @@ class StdDevTrending(TrendingObject):
         else:
             self.currentEntry += 1
 
-        newValue = hist.hist.GetStdDev(), hist.hist.GetStdDevError()
+        newValue = hist.GetStdDev(), hist.GetStdDevError()
         self.trendedValues = np.append(self.trendedValues, [newValue], axis=0)
 
     def retrieveHist(self):
