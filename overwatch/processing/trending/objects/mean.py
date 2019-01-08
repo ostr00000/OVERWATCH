@@ -10,7 +10,6 @@ import ROOT
 from overwatch.processing.trending.objects.object import TrendingObject
 
 
-
 class MeanTrending(TrendingObject):
     def initializeTrendingArray(self):
         return np.zeros((0, 2), dtype=np.float)
@@ -21,7 +20,7 @@ class MeanTrending(TrendingObject):
         else:
             self.currentEntry += 1
 
-        newValue = hist.hist.GetMean(), hist.hist.GetMeanError()
+        newValue = hist.GetMean(), hist.GetMeanError()
         self.trendedValues = np.append(self.trendedValues, [newValue], axis=0)
 
     def retrieveHist(self):

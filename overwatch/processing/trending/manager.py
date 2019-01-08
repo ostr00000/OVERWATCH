@@ -96,7 +96,6 @@ class TrendingManager(Persistent):
         """
         for subsystem in self.parameters[CON.SUBSYSTEMS]:
             self._createTrendingObjectsForSubsystem(subsystem)
-        print('z\n' *100)
 
     def _createTrendingObjectsForSubsystem(self, subsystemName):  # type: (str) -> None
         functionName = "{subsystem}_getTrendingObjectInfo".format(subsystem=subsystemName)
@@ -159,10 +158,10 @@ class TrendingManager(Persistent):
         """
         for trend in self.histToTrending.get(hist.histName, []):
             trend.extractTrendValue(hist.hist)
-            for alarm in trend.alarms:
-                alarm.processCheck(trend)
-            if trend.alarmsMessages:
-                hist.information["Alarm" + trend.name] = '\n'.join(trend.alarmsMessages)
-                trend.alarmsMessages = []
-            alarmCollector.showOnConsole()
+            # for alarm in trend.alarms:
+            #     alarm.processCheck(trend)
+            # if trend.alarmsMessages:
+            #     hist.information["Alarm" + trend.name] = '\n'.join(trend.alarmsMessages)
+            #     trend.alarmsMessages = []
+            # alarmCollector.showOnConsole()
         # alarmCollector.announceOnSlack()

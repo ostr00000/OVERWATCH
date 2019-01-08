@@ -5,8 +5,12 @@
 """
 import past.builtins
 
+from overwatch.base import config
 from overwatch.processing.alarms.alarm import Alarm
 from overwatch.processing.trending.objects.object import TrendingObject
+from overwatch.processing.trending.objects_cpp.utilities import pythonStringListToVector
+
+(databaseParameters, _) = config.readConfig(config.configurationType.database)
 
 try:
     from typing import *  # noqa
@@ -65,18 +69,13 @@ class TrendingInfo:
             TrendingObject: newly created object
         """
 
-        trend = self.trendingClass(self.name, self.desc, self.histogramNames, subsystemName, parameters)
+        histogramNames = pythonStringListToVector(self.histogramNames)
 
-
-        import ROOT
-        v = ROOT.vector(str)()
-        for s in self.histogramNames:
-            v.push_back(s)
-
-        trend = self.trendingClass(self.name, self.desc, v, subsystemName,parameters.get(CON.ENTRIES, 100), parameters[CON.DIR_PREFIX])
-        trend.setAlarms(self._alarms)
+        trend = self.trendingClass(self.name, self.desc, histogramNames, subsystemName,
+                                   parameters.get(CON.ENTRIES, 100),
+                                   parameters[CON.DIR_PREFIX])
+        # trend.setAlarms(self._alarms)
         return trend
-
 
     @staticmethod
     def _validate(obj):  # type: (str) -> str
