@@ -21,7 +21,7 @@ from future.utils import iteritems
 from future.utils import itervalues
 
 # Database
-import BTrees.OOBTree
+import BTrees
 import persistent
 
 import os

@@ -7,7 +7,7 @@ import past.builtins
 
 from overwatch.base import config
 from overwatch.processing.alarms.alarm import Alarm
-from overwatch.processing.trending.objects.object import TrendingObject
+# from overwatch.processing.trending.objects.object import TrendingObject
 from overwatch.processing.trending.objects_cpp.utilities import pythonStringListToVector
 
 (databaseParameters, _) = config.readConfig(config.configurationType.database)
@@ -74,7 +74,7 @@ class TrendingInfo:
         trend = self.trendingClass(self.name, self.desc, histogramNames, subsystemName,
                                    parameters.get(CON.ENTRIES, 100),
                                    parameters[CON.DIR_PREFIX])
-        # trend.setAlarms(self._alarms)
+        trend.setAlarms(self._alarms)
         return trend
 
     @staticmethod

@@ -12,13 +12,6 @@ class MongoDatabaseFactory(DatabaseFactory):
         self.port = port
 
     def initializeDB(self):
-        """ Deletes item from database.
-
-        Args:
-            key (String): name of item to delete
-        Returns:
-            None
-        """
         client = pymongo.MongoClient(
             host=self.host,
             port=self.port)

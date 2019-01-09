@@ -44,6 +44,7 @@ class TrendingObject(Persistent):
         # Ensure that the axis and points are drawn on the TGraph
         self.drawOptions = 'AP'
         self.dirPrefix = dirPrefix
+
     def __str__(self):
         return self.name
 

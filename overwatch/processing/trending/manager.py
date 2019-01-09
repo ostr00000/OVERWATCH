@@ -11,14 +11,15 @@ import logging
 import os
 from collections import defaultdict
 
-import BTrees
+
 import ROOT
 from persistent import Persistent
 
+import BTrees
+
 import overwatch.processing.pluginManager as pluginManager
 import overwatch.processing.trending.constants as CON
-from overwatch.processing.alarms.collectors import Mail, SlackNotification
-from overwatch.processing.alarms.collectors import alarmCollector
+from overwatch.processing.alarms.collectors import Mail, SlackNotification, alarmCollector
 
 logger = logging.getLogger(__name__)
 
@@ -158,10 +159,10 @@ class TrendingManager(Persistent):
         """
         for trend in self.histToTrending.get(hist.histName, []):
             trend.extractTrendValue(hist.hist)
-            # for alarm in trend.alarms:
-            #     alarm.processCheck(trend)
-            # if trend.alarmsMessages:
-            #     hist.information["Alarm" + trend.name] = '\n'.join(trend.alarmsMessages)
-            #     trend.alarmsMessages = []
-            # alarmCollector.showOnConsole()
+            for alarm in trend.alarms:
+                alarm.processCheck(trend)
+            if trend.alarmsMessages:
+                hist.information["Alarm" + trend.name] = '\n'.join(trend.alarmsMessages)
+                trend.alarmsMessages = []
+            alarmCollector.showOnConsole()
         # alarmCollector.announceOnSlack()
